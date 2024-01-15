@@ -1,0 +1,186 @@
+
+
+public class Q3 {
+    public static void main(String[] args) {
+		Q3 obj = new Q3();
+		
+        int[][] rectangle = {{2, 3}, {5, 3}, {5, 7}, {2, 7}}; //rectangle [(x1, y1), (x2, y2), (x3, y3), (x4, y4)]
+        int[] translation = {1, 2}; //translation vector (tx, ty)
+
+        System.out.println("Original Rectangle:");
+        obj.printRectangle(rectangle);
+        obj.translateRectangle(rectangle, translation);
+        System.out.println("Translated Rectangle:");
+        obj.printRectangle(rectangle);
+    }
+
+    private void translateRectangle(int[][] P, int[] T) {
+        for (int i = 0; i < P.length; i++) {
+            if (P[i].length == 2 && T.length == 2) {
+                P[i][0] += T[0]; // Translate x-coordinate
+                P[i][1] += T[1]; // Translate y-coordinate
+            } else {
+                System.out.println("Invalid input arrays. Each point array should have exactly 2 elements.");
+                return;
+            }
+        }
+    }
+
+    private void printRectangle(int[][] rectangle) {
+        for (int i = 0; i < rectangle.length; i++) {
+            System.out.println("(" + rectangle[i][0] + ", " + rectangle[i][1] + ")");
+        }
+    }
+}
+
+---------------------------------------------------------------------------------------
+
+import javax.swing.*;
+import java.awt.*;
+
+public class Q4 extends JFrame {
+    private int[][] house = {
+            {0, 0}, {100, 0}, {100, 100}, {0, 100}, {0, 0}, // House
+			{50, -40}, {100, 0}, //House roof
+			{100, 100}, {70, 100},  //Back to door
+            {70, 50}, {30, 50}, {30, 100} // Door
+    };
+
+    private int[] translation = {100, 100}; // Translate the entire picture to the center
+
+    public Q4() {
+        setTitle("Draw Picture");
+        setSize(400, 400);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setLocationRelativeTo(null); // Center the frame
+
+        translateShape(house, translation);
+
+        getContentPane().add(new DrawingPanel());
+    }
+
+    private void translateShape(int[][] shape, int[] translation) {
+        for (int i = 0; i < shape.length; i++) {
+            if (shape[i].length == 2 && translation.length == 2) {
+                shape[i][0] += translation[0];
+                shape[i][1] += translation[1];
+            } else {
+                System.out.println("Invalid input arrays. Each point array should have exactly 2 elements.");
+                return;
+            }
+        }
+    }
+
+    class DrawingPanel extends JPanel {
+        protected void paintComponent(Graphics g) {
+            super.paintComponent(g);
+            Graphics2D g2d = (Graphics2D) g;
+
+            g2d.setColor(Color.BLACK);
+            for (int i = 0; i < house.length - 1; i++) {
+                int x1 = house[i][0];
+                int y1 = house[i][1];
+                int x2 = house[i + 1][0];
+                int y2 = house[i + 1][1];
+                g2d.drawLine(x1, y1, x2, y2);
+            }
+        }
+    }
+
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(() -> {
+            Q4 drawPicture = new Q4();
+            drawPicture.setVisible(true);
+        });
+    }
+}
+
+--------------------------------------------------------------------------------------------------------
+
+import javax.swing.*;
+import java.awt.*;
+
+public class DDAScale extends JFrame {
+    private int centerX, centerY, maxX, maxY;
+    private double scaleX, scaleY; // Scaling factors
+
+    public DDAScale() {
+        setTitle("DDA Algorithm");
+        setSize(500, 500);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
+        // Set up the drawing panel
+        DrawingPanel drawingPanel = new DrawingPanel();
+        add(drawingPanel);
+
+        // Center the frame on the screen
+        Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+        setLocation((screenSize.width - getWidth()) / 2, (screenSize.height - getHeight()) / 2);
+
+        // Set initial scaling factors
+        scaleX = 1.0;
+        scaleY = 1.0;
+    }
+
+    class DrawingPanel extends JPanel {
+        public DrawingPanel() {
+            setPreferredSize(new Dimension(400, 400));
+        }
+
+        private void initgr() {
+            Dimension d = getSize();
+            maxX = d.width - 1;
+            maxY = d.height - 1;
+            centerX = maxX / 2;
+            centerY = maxY / 2;
+        }
+
+        private void drawLine(Graphics g, int x1, int y1, int x2, int y2) {
+            double xc, yc;
+            double dx, dy, steps, x, y, k;
+
+            dx = x2 - x1;
+            dy = y2 - y1;
+
+            if (Math.abs(dx) > Math.abs(dy))
+                steps = Math.abs(dx);
+            else
+                steps = Math.abs(dy);
+
+            xc = (dx / steps);
+            yc = (dy / steps);
+            x = x1;
+            y = y1;
+
+            for (k = 1; k <= steps; k++) {
+                x = x + xc;
+                y = y + yc;
+                g.fillOval((int) (x * scaleX), (int) (y * scaleY), 5, 5);
+            }
+        }
+
+        @Override
+        protected void paintComponent(Graphics g) {
+            super.paintComponent(g);
+            initgr();
+
+            // Set your desired scaling factors
+            scaleX = 2.0;
+            scaleY = 0.5;
+
+            // Draw scaled lines
+            drawLine(g, centerX - 100, centerY + 100, centerX + 100, centerY + 100);
+            drawLine(g, centerX + 100, centerY + 100, centerX + 100, centerY - 100);
+            drawLine(g, centerX + 100, centerY - 100, centerX - 100, centerY - 100);
+            drawLine(g, centerX - 100, centerY - 100, centerX - 100, centerY + 100);
+        }
+    }
+
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(() -> {
+            DDAScale obj = new DDAScale();
+            obj.setVisible(true);
+        });
+    }
+}
+
